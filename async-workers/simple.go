@@ -15,7 +15,13 @@ func processAnimal(animal string, taskId int) string {
 
 func Simple1() {
 	animals := []string{"dog", "cat", "bird", "monkey", "fish", "snake", "whale"}
+
+	// chan for gathering data out of goroutines. it needs to be buffered otherwise it
+	// will block inside for loop when writing to it because reading
+	// from this chan isn't fired yet (because we do `wg.Wait` before doing the reading)
 	resultStream := make(chan string, len(animals))
+	// chan for sending the data to the goroutines
+	// this can be unbufferd because we initialised the sender and receiver together.
 	animalStream := make(chan string)
 
 	var wg sync.WaitGroup
@@ -26,7 +32,7 @@ func Simple1() {
 			// Get animals from the channel. Don't forget to close the `animalStream`
 			// when you are done sending the data in or else you will have a deadlock
 			// here.
-			for a := range animalStream {
+			for a := range animalStream { // blocking operation the the chan is empty or if the chan is not closed
 				log.Infof("Worker %d starting\n", id)
 				resultStream <- processAnimal(a, id)
 				log.Infof("Worker %d done\n", id)
@@ -54,7 +60,12 @@ func Simple1() {
 
 	// Gather the data
 	for i := 0; i < len(animals); i++ {
-		result := <-resultStream
+		result := <-resultStream // blocking operation if the channel is empty
 		log.Infof("We have the processed data ready: %s\n", result)
 	}
+
+	// Hey, close the `resultStream` chan (i.e. `close(resultStream)`)!
+	// You needn't close every channel when you've finished with it. It's only necessary
+	// to close a channel when it's important to tell the receiving goroutines that all
+	// data have been sent.
 }
