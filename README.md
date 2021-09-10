@@ -21,6 +21,14 @@ terminal which will show you how the code runs.
 The other way is to select an example function and run it in `main()` function in `main.go`
 file and then run the main.go (`go run main.go`).
 
+`main.go` has a production working example of sending ssh commands to different servers.
+It's used to execute commands via ssh concurrently on multuple servers at a time, saving
+us a lot of time.
+
+To use it simply change the `serverHostnames := []string{"foo", "bar"}`.
+In `async-workers/ssh.go` we define the "engine" for running ssh commands. It's basically
+the same as the `production.go` version.
+
 ## Additional reading
 
 I highly recommend checking out [Learn Go with Test](https://quii.gitbook.io/learn-go-with-tests/)
