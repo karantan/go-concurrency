@@ -29,7 +29,7 @@ func main() {
 
 	results := ssh.Run(ssh.GenericJobRunner, jobs)
 	for _, r := range results {
-		log.Infof("[%d/%d %s] %s", r.JobNumber+1, len(results), r.Hostname, r.Result)
+		log.Infof("[%d/%d %s] %s (exit code: %d)", r.JobNumber+1, len(results), r.Hostname, r.Result, r.ExitCode)
 	}
 
 }

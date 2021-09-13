@@ -2,6 +2,7 @@ package async_workers
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"os/exec"
 	"strings"
@@ -20,6 +21,7 @@ type JobResult struct {
 	JobNumber int
 	Hostname  string
 	Result    string
+	ExitCode  int
 }
 
 // JobRunner type is used for DI
@@ -75,11 +77,18 @@ func GenericJobRunner(j Job) JobResult {
 	command := strings.Split(j.Command, " ")
 	cmd := exec.Command(j.App, command...)
 	log.Infof("Executing command `%s` on %s ...", cmd.String(), j.Hostname)
-	out, _ := cmd.CombinedOutput()
+	out, err := cmd.CombinedOutput()
+
+	var ee *exec.ExitError
+	exitCode := 0
+	if errors.As(err, &ee) {
+		exitCode = ee.ExitCode()
+	}
 
 	return JobResult{
 		JobNumber: j.JobNumber,
 		Hostname:  j.Hostname,
 		Result:    strings.TrimRight(string(out), "\n"),
+		ExitCode:  exitCode,
 	}
 }
